@@ -47,6 +47,9 @@ const META = {
     description:
       "Tecnowizz Sistemas: consultoría de dirección, ingeniería e inteligencia artificial, especializada en el desarrollo de dispositivos localizadores GNSS compactos.",
     skip: "Ir al contenido",
+    pcbAlt: "Modelo 3D de la placa electrónica de un dispositivo localizador GNSS",
+    pcbLabel: "Hardware · modelo 3D",
+    pcbCaption: "Placa electrónica de un localizador GNSS compacto",
     fundingAlt:
       "Gobierno de España, Ministerio de Asuntos Económicos y Transformación Digital. Red.es. Kit Digital. Plan de Recuperación, Transformación y Resiliencia. Financiado por la Unión Europea, NextGenerationEU.",
   },
@@ -55,6 +58,9 @@ const META = {
     description:
       "Tecnowizz Sistemas: management, engineering and artificial intelligence consulting, specialised in developing compact GNSS tracking devices.",
     skip: "Skip to content",
+    pcbAlt: "3D model of the circuit board of a GNSS tracking device",
+    pcbLabel: "Hardware · 3D model",
+    pcbCaption: "Circuit board of a compact GNSS tracking device",
     fundingAlt:
       "Government of Spain, Ministry of Economic Affairs and Digital Transformation. Red.es. Kit Digital. Recovery, Transformation and Resilience Plan. Funded by the European Union, NextGenerationEU.",
   },
@@ -107,6 +113,25 @@ function page(lang) {
     },
   );
   if (/<button|onClick|\{\{|sc-for/.test(body)) throw new Error("Quedan restos de plantilla sin convertir");
+
+  // Render de la placa GNSS (no está en el diseño): franja a todo el ancho entre las
+  // tarjetas 01/02 y la de IA, para no descompensar la altura de las dos tarjetas.
+  const pcbAnchor = /<div style="flex: 1 1 100%; min-width: 0; border: 1px solid #[0-9a-f]{6}; border-radius: 20px/;
+  if (!pcbAnchor.test(body)) throw new Error("No encuentro la tarjeta de IA para colocar el render");
+  body = body.replace(
+    pcbAnchor,
+    (m0) => `<div style="flex: 1 1 100%; min-width: 0; background: #f3f4f6; border-radius: 20px; padding: clamp(20px, 3vw, 44px); display: flex; flex-wrap: wrap; align-items: center; gap: 24px 56px">
+<div style="flex: 1 1 240px; min-width: 0; display: flex; flex-direction: column; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; color: #5d6470">${esc(m.pcbLabel)}</span>
+<p style="margin: 0; font-family: Sora, sans-serif; font-weight: 600; font-size: clamp(20px, 2.2vw, 26px); line-height: 1.25; letter-spacing: -0.02em; color: #0e1013">${esc(m.pcbCaption)}</p>
+</div>
+<div style="flex: 2 1 380px; min-width: 0; background: #ffffff; border-radius: 14px; padding: clamp(12px, 2vw, 28px)">
+<img src="/assets/pcb.png" alt="${esc(m.pcbAlt)}" width="839" height="365" loading="lazy" style="display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto">
+</div>
+</div>
+
+${m0}`,
+  );
 
   // Banda de logos del Kit Digital (obligatoria, no está en el diseño): justo antes del pie
   const funding = `<div style="background: #ffffff">
