@@ -76,6 +76,14 @@ img{max-width:100%}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
 `.trim();
 
+// Idioma por defecto: la portada en español redirige a /en/ si el navegador no tiene
+// español (ni catalán, gallego o euskera) entre sus idiomas. La elección manual con el
+// selector ES/EN se recuerda y tiene prioridad. Los rastreadores no se redirigen.
+const LANG_REDIRECT = `<script>
+(function(){try{var s=localStorage.getItem('lang');if(s==='es')return;if(s!=='en'){if(/bot|crawl|spider|slurp|preview|lighthouse|headless/i.test(navigator.userAgent))return;var l=navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||''];for(var i=0;i<l.length;i++){if(/^(es|ca|gl|eu)(-|$)/i.test(l[i]))return}}location.replace('/en/'+location.hash)}catch(e){}})();
+</script>
+`;
+
 function page(lang) {
   const c = new Component();
   c.props = { accent: "#e31b23", lang };
@@ -95,7 +103,7 @@ function page(lang) {
     (_, label, style, code) => {
       const target = code.toLowerCase();
       const current = target === lang ? ' aria-current="page"' : "";
-      return `<a href="${PAGES[target].path}" hreflang="${target}" lang="${target}" aria-label="${label}"${current} style="${style.replace("cursor: pointer; ", "")}; display: flex; align-items: center; justify-content: center">${code}</a>`;
+      return `<a href="${PAGES[target].path}" hreflang="${target}" lang="${target}" aria-label="${label}"${current} onclick="try{localStorage.setItem('lang','${target}')}catch(e){}" style="${style.replace("cursor: pointer; ", "")}; display: flex; align-items: center; justify-content: center">${code}</a>`;
     },
   );
   if (/<button|onClick|\{\{|sc-for/.test(body)) throw new Error("Quedan restos de plantilla sin convertir");
@@ -121,6 +129,7 @@ function page(lang) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(m.title)}</title>
+${lang === "es" ? LANG_REDIRECT : ""}
 <meta name="description" content="${esc(m.description)}">
 <link rel="canonical" href="${SITE}${p.path}">
 ${alternates}
